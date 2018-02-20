@@ -1,0 +1,201 @@
+--- #This playbook deploys webserver with packages and users
+
+- hosts: all 
+
+  become: yes
+
+  become_method: sudo 
+
+  connection: ssh
+
+  tasks: 
+
+    - name: Add 5 users
+
+      user:
+
+        name: "{{ item }}"
+
+        state: present
+
+      with_items: 
+
+        - ron1
+
+        - bill1
+
+        - khan1
+
+        - curt1
+
+        - brook1
+
+
+
+    - name: Install 5 packages
+
+      package: 
+
+        pkg: "{{ item }}"
+
+        state: latest
+
+      with_items:
+
+        - lftp
+
+        - wget
+
+        - ftp 
+
+        - elinks
+
+        - tree
+
+
+
+    - name: Install webserver
+
+      package:
+
+        pkg: httpd
+
+        state: latest
+
+
+
+    - name: Copy template to remote system
+
+      template:
+
+        src: /tmp/index.html
+
+        dest: /var/www/html/index.html
+
+        owner: root
+
+        group: root
+
+        mode: 0755
+
+
+
+
+
+    - name: install firewalld
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      package:
+
+        name: firewalld
+
+        state: latest
+
+
+
+    - name: start firewall
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      systemd:
+
+        name: firewalld
+
+        state: started
+
+
+
+    - name: Open port 22
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      command: "firewall-cmd --zone=public --add-port=22/tcp --permanent"
+
+
+
+    - name: Open port on centos 7
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      command: "firewall-cmd --zone=public --add-port=80/tcp --permanent"
+
+
+
+    - name: Open port on centos 7
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      command: "firewall-cmd --zone=public --add-port=443/tcp --permanent"
+
+
+
+    - name: Open port on centos 7
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      command: "firewall-cmd --reload"
+
+
+
+    - name: Open port 80
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+
+      command: "iptables -I INPUT -p tcp --dport 80 -j ACCEPT"
+
+
+
+    - name: Open port 443
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+
+      command: "iptables -I INPUT -p tcp --dport 443 -j ACCEPT"
+
+
+
+    - name: Save the rules
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+
+      command: "service iptables save"
+
+    
+
+    - name: Restart iptables 
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+
+      service: 
+
+        name: iptables 
+
+        state: restarted
+
+
+
+    - name: Start web server 
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+
+      service:
+
+        name: httpd 
+
+        state: restarted 
+
+        enabled: yes 
+
+
+
+    - name: Start web server on centos 7 
+
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+      systemd:
+
+        name: httpd
+
+        state: restarted
+
+        enabled: yes  

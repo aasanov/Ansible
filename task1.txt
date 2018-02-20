@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  connection: ssh
+  tasks:
+    - name: upgrade the kernel
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+      yum:
+        name: kernel
+        state: latest
+
+    - name: Add user
+      user:
+        name: bob
+        state: present
+
+
+    - name: Reboot CentOS 6
+      when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6")
+      command: "reboot"
+
+
+    - name: Install package for Debian
+      when: ansible_os_family == "Debian"
+      apt:
+        name: wget
+        state: present
