@@ -1,0 +1,27 @@
+---
+- name: User and service management
+  hosts: all
+  become: yes
+  vars:
+    users:
+      - { name: James }
+      - { name: Chris }
+  tasks:
+    - name: Add the users on RedHat Servers
+      user:
+        name: "{{ item.name }}"
+        state: present
+      with_items: "{{ users }}"
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Install httpd on Amazon Linux servers
+      yum:
+        name: httpd
+        state: latest
+      when: "'Amazon' in ansible_distribution"
+
+    - name: Install git on RedHat
+      yum:
+        name: git
+        state: present
+      when: "'RedHat' in ansible_distribution"
